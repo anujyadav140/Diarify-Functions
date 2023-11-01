@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable quotes */
 /* eslint-disable new-cap */
 /* eslint-disable max-len */
@@ -27,7 +28,7 @@ exports.vectorDiaryEntry = functions.https.onCall(async (data) => {
   if (!data.entry || !data.user) {
     throw new functions.https.HttpsError("invalid-argument", "an entry is required ...");
   }
-  const dateNow = new Date().toLocaleDateString;
+  const dateNow = new Date().toLocaleString();
   const entry = `Date and Time:\n${dateNow}\n
   Entry:\n${data.entry}`;
   const documents = [
@@ -52,7 +53,7 @@ exports.chatWithDiary = functions.https.onCall(async (data) => {
     new OpenAIEmbeddings({openAIApiKey: process.env.OPENAI}),
     {pineconeIndex}
   );
-  const dateNow = new Date().toLocaleDateString;
+  const dateNow = new Date().toLocaleString();
   const question = `Date and Time:\n${dateNow}\n
   Question:\n${data.question}`;
   const vectorEntryResponse = await vectorStore.similaritySearch(question, 10, {user: data.user});
