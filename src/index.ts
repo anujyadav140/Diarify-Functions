@@ -28,13 +28,10 @@ exports.vectorDiaryEntry = functions.https.onCall(async (data) => {
   if (!data.entry || !data.user) {
     throw new functions.https.HttpsError("invalid-argument", "an entry is required ...");
   }
-  const dateNow = new Date().toLocaleString();
-  const entry = `Date and Time:\n${dateNow}\n
-  Entry:\n${data.entry}`;
   const documents = [
     new Document({
       metadata: {user: data.user},
-      pageContent: entry,
+      pageContent: data.entry,
     }),
   ];
   const embeddings = new OpenAIEmbeddings({openAIApiKey: process.env.OPENAI});
@@ -53,10 +50,8 @@ exports.chatWithDiary = functions.https.onCall(async (data) => {
     new OpenAIEmbeddings({openAIApiKey: process.env.OPENAI}),
     {pineconeIndex}
   );
-  const dateNow = new Date().toLocaleString();
-  const question = `Date and Time:\n${dateNow}\n
-  Question:\n${data.question}`;
-  const vectorEntryResponse = await vectorStore.similaritySearch(question, 10, {user: data.user});
+
+  const vectorEntryResponse = await vectorStore.similaritySearch(data.question, 10, {user: data.user});
   const llm = new ChatOpenAI({
     modelName: "gpt-3.5-turbo",
     openAIApiKey: process.env.OPENAI,
@@ -65,7 +60,8 @@ exports.chatWithDiary = functions.https.onCall(async (data) => {
   const stuffChain = loadQAStuffChain(llm);
   const stuffResult = await stuffChain.call({
     input_documents: vectorEntryResponse,
-    question: question,
+    question: data.question,
   });
+  console.log(stuffResult);
   return {"response": stuffResult};
 });
